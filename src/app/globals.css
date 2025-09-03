@@ -67,12 +67,56 @@ a {
     }
 }
 
+@keyframes bounce-slow {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
 .animate-float {
     animation: float 3s ease-in-out infinite;
 }
 
 .animate-pulse-heart {
     animation: pulse-heart 1s ease-in-out infinite;
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 2s ease-in-out infinite;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+    .font-cute {
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+    }
+
+    /* Ensure touch targets are at least 44px */
+    button,
+    input,
+    select,
+    textarea {
+        min-height: 44px;
+    }
+
+    /* Improve text readability on small screens */
+    body {
+        font-size: 14px;
+        line-height: 1.5;
+    }
 }
 
 /* Custom scrollbar */

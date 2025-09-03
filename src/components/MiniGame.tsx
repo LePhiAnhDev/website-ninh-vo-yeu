@@ -21,14 +21,15 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
     const [isDragging, setIsDragging] = useState(false);
     const [showLoading, setShowLoading] = useState(false);
     const gameAreaRef = useRef<HTMLDivElement>(null);
+    const audioRef = useRef<HTMLAudioElement>(null);
 
     const getCenterPosition = (): Position => {
         if (!gameAreaRef.current) return { x: 0, y: 0 };
 
         const rect = gameAreaRef.current.getBoundingClientRect();
         return {
-            x: (rect.width - 40) / 2, // 40px là kích thước vật thể
-            y: (rect.height - 40) / 2
+            x: (rect.width - 32) / 2, // 32px là kích thước vật thể
+            y: (rect.height - 32) / 2
         };
     };
 
@@ -36,8 +37,8 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
         if (!gameAreaRef.current) return { x: 200, y: 150 };
 
         const rect = gameAreaRef.current.getBoundingClientRect();
-        const maxX = rect.width - 25; // 25px là kích thước trái tim
-        const maxY = rect.height - 25;
+        const maxX = rect.width - 20; // 20px là kích thước trái tim
+        const maxY = rect.height - 20;
 
         return {
             x: Math.random() * maxX,
@@ -50,6 +51,13 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
             Math.pow(pos1.x - pos2.x, 2) + Math.pow(pos1.y - pos2.y, 2)
         );
         return distance < threshold;
+    };
+
+    const playTingSound = () => {
+        if (audioRef.current) {
+            audioRef.current.currentTime = 0;
+            audioRef.current.play().catch(console.error);
+        }
     };
 
     const handleKeyPress = useCallback((e: KeyboardEvent) => {
@@ -119,6 +127,7 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
         if (gameStarted && checkCollision(playerPos, heartPos)) {
             setScore(prev => prev + 1);
             setHeartPos(generateRandomPosition());
+            playTingSound(); // Phát âm thanh ting khi ăn tim
 
             if (score + 1 >= 10) {
                 setShowLoading(true);
@@ -153,8 +162,8 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
         const touch = e.touches[0];
         const rect = gameAreaRef.current?.getBoundingClientRect();
         if (rect) {
-            const newX = Math.max(0, Math.min(rect.width - 40, touch.clientX - rect.left));
-            const newY = Math.max(0, Math.min(rect.height - 40, touch.clientY - rect.top));
+            const newX = Math.max(0, Math.min(rect.width - 32, touch.clientX - rect.left));
+            const newY = Math.max(0, Math.min(rect.height - 32, touch.clientY - rect.top));
             setPlayerPos({ x: newX, y: newY });
         }
     };
@@ -176,8 +185,8 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
         e.preventDefault();
         const rect = gameAreaRef.current?.getBoundingClientRect();
         if (rect) {
-            const newX = Math.max(0, Math.min(rect.width - 40, e.clientX - rect.left));
-            const newY = Math.max(0, Math.min(rect.height - 40, e.clientY - rect.top));
+            const newX = Math.max(0, Math.min(rect.width - 32, e.clientX - rect.left));
+            const newY = Math.max(0, Math.min(rect.height - 32, e.clientY - rect.top));
             setPlayerPos({ x: newX, y: newY });
         }
     };
@@ -189,17 +198,22 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-love-100 to-pink-love-200 flex flex-col items-center justify-center p-2 sm:p-4">
-            <div className="text-center mb-4 sm:mb-6">
-                <h1 className="text-2xl sm:text-4xl font-bold text-pink-love-600 mb-2 font-cute animate-bounce-slow">WebsiteNinhVoYeu 💕</h1>
-                <div className="text-lg sm:text-2xl font-semibold text-pink-love-500">
+        <div className="min-h-screen bg-gradient-to-br from-pink-love-100 to-pink-love-200 flex flex-col items-center justify-center p-1 sm:p-4">
+            {/* Audio element for ting sound */}
+            <audio ref={audioRef} preload="auto">
+                <source src="/ting-sound.mp3" type="audio/mpeg" />
+            </audio>
+
+            <div className="text-center mb-2 sm:mb-6">
+                <h1 className="text-lg sm:text-4xl font-bold text-pink-love-600 mb-1 sm:mb-2 font-cute animate-bounce-slow">WebsiteNinhVoYeu 💕</h1>
+                <div className="text-sm sm:text-2xl font-semibold text-pink-love-500">
                     Score: {score}/10 ❤️
                 </div>
             </div>
 
             <div
                 ref={gameAreaRef}
-                className="relative bg-white rounded-2xl shadow-xl border-4 border-pink-love-300 w-full max-w-4xl h-64 sm:h-96 overflow-hidden touch-none select-none"
+                className="relative bg-white rounded-xl sm:rounded-2xl shadow-xl border-2 sm:border-4 border-pink-love-300 w-full max-w-sm sm:max-w-4xl h-48 sm:h-96 overflow-hidden touch-none select-none"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -214,15 +228,15 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
                     style={{
                         left: `${playerPos.x}px`,
                         top: `${playerPos.y}px`,
-                        width: '40px',
-                        height: '40px'
+                        width: '32px',
+                        height: '32px'
                     }}
                 >
                     <Image
                         src="/obj.png"
                         alt="Player"
-                        width={40}
-                        height={40}
+                        width={32}
+                        height={32}
                         className="w-full h-full object-contain"
                     />
                 </div>
@@ -233,16 +247,16 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
                     style={{
                         left: `${heartPos.x}px`,
                         top: `${heartPos.y}px`,
-                        width: '25px',
-                        height: '25px'
+                        width: '20px',
+                        height: '20px'
                     }}
                 >
-                    <div className="text-red-500 text-2xl sm:text-3xl animate-pulse-heart">❤️</div>
+                    <div className="text-red-500 text-lg sm:text-3xl animate-pulse-heart">❤️</div>
                 </div>
             </div>
 
-            <div className="mt-4 sm:mt-6 text-center px-4">
-                <p className="text-pink-love-600 font-medium mb-2 text-sm sm:text-base">
+            <div className="mt-2 sm:mt-6 text-center px-2 sm:px-4">
+                <p className="text-pink-love-600 font-medium mb-1 sm:mb-2 text-xs sm:text-base">
                     <span className="hidden sm:inline">Sử dụng phím mũi tên hoặc WASD để di chuyển</span>
                     <span className="sm:hidden">Chạm và kéo để di chuyển</span>
                 </p>
@@ -253,18 +267,18 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
 
             {/* Start Game Popup */}
             {showStartPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md w-full text-center">
-                        <div className="text-4xl sm:text-6xl mb-4">🎮</div>
-                        <h2 className="text-xl sm:text-2xl font-bold text-pink-love-600 mb-4 font-cute">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full text-center">
+                        <div className="text-3xl sm:text-6xl mb-3 sm:mb-4">🎮</div>
+                        <h2 className="text-lg sm:text-2xl font-bold text-pink-love-600 mb-3 sm:mb-4 font-cute">
                             Chào mừng đến với Mini Game! 🎮
                         </h2>
-                        <p className="text-gray-700 mb-6 text-sm sm:text-lg">
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-xs sm:text-lg">
                             Hãy ăn 10 trái tim để nhận phần thưởng 💕
                         </p>
                         <button
                             onClick={startGame}
-                            className="bg-gradient-to-r from-pink-love-500 to-pink-love-600 text-white px-6 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:from-pink-love-600 hover:to-pink-love-700 transition-all duration-200 transform hover:scale-105 text-sm sm:text-base"
+                            className="bg-gradient-to-r from-pink-love-500 to-pink-love-600 text-white px-4 sm:px-8 py-2 sm:py-3 rounded-lg font-semibold hover:from-pink-love-600 hover:to-pink-love-700 transition-all duration-200 transform hover:scale-105 text-xs sm:text-base"
                         >
                             Bắt đầu chơi 🎯
                         </button>
@@ -274,19 +288,19 @@ export default function MiniGame({ onGameComplete }: MiniGameProps) {
 
             {/* Loading Screen */}
             {showLoading && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl max-w-md w-full text-center animate-float">
-                        <div className="text-6xl mb-4 animate-bounce-slow">🎉</div>
-                        <h2 className="text-2xl sm:text-3xl font-bold text-pink-love-600 mb-4 font-cute">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+                    <div className="bg-white p-4 sm:p-8 rounded-xl sm:rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full text-center animate-float">
+                        <div className="text-4xl sm:text-6xl mb-3 sm:mb-4 animate-bounce-slow">🎉</div>
+                        <h2 className="text-lg sm:text-3xl font-bold text-pink-love-600 mb-3 sm:mb-4 font-cute">
                             Chúc mừng! 🎊
                         </h2>
-                        <p className="text-gray-700 mb-6 text-sm sm:text-lg">
+                        <p className="text-gray-700 mb-4 sm:mb-6 text-xs sm:text-lg">
                             Bạn đã thu thập đủ 10 trái tim! 💕
                         </p>
-                        <div className="flex items-center justify-center mb-4">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-love-500"></div>
+                        <div className="flex items-center justify-center mb-3 sm:mb-4">
+                            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-pink-love-500"></div>
                         </div>
-                        <p className="text-pink-love-500 text-sm">
+                        <p className="text-pink-love-500 text-xs sm:text-sm">
                             Đang chuẩn bị phần thưởng...
                         </p>
                     </div>
